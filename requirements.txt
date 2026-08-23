@@ -1,0 +1,3 @@
+# Third-party runtime dependency.
+# AstrBot installs this file automatically when installing the plugin.
+aiohttp>=3.9,<4

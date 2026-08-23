@@ -1,0 +1,16 @@
+name: astrbot_plugin_scene_aw
+display_name: ActivityWatch 情景感知
+short_desc: 将 ActivityWatch 桌面活动转化为可供 AstrBot Agent 使用的实时场景上下文。
+desc: >-
+  连接 ActivityWatch，持续识别用户当前事务、窗口焦点、离席状态与应用分类，
+  向 Agent 注入实时场景上下文，并提供分类维护、主动提醒和管理面板。
+version: 1.0.0
+author: GoblinCwl
+repo: https://github.com/GoblinCwl/astrbot_plugin_scene_aw
+astrbot_version: ">=4.27.3,<5"
+social_link: https://github.com/GoblinCwl
+tags:
+  - activitywatch
+  - context-awareness
+  - productivity
+  - agent-tools

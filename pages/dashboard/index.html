@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>场景感知</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <h1>场景感知</h1>
+        <p>实时活动与场景状态</p>
+      </div>
+      <div class="header-actions">
+        <span id="updatedAt" class="muted">--</span>
+        <button id="refreshBtn">刷新</button>
+      </div>
+    </header>
+
+    <section class="status-grid">
+      <div class="status-card">
+        <span>活动监测</span>
+        <strong id="awStatus">--</strong>
+      </div>
+      <div class="status-card">
+        <span>当前场景</span>
+        <strong id="sceneStatus">待判断</strong>
+      </div>
+      <div class="status-card">
+        <span>是否离开</span>
+        <strong id="afkStatus">--</strong>
+      </div>
+    </section>
+
+    <main class="layout">
+      <div class="column">
+
+        <section class="panel">
+          <div class="panel-title">
+            <h2>当前事务</h2>
+            <span id="threadCount" class="badge">0</span>
+          </div>
+          <div id="threads" class="empty">尚未建立事务场景</div>
+          <div id="previousScene" class="previous-inline empty">暂无上次场景</div>
+        </section>
+
+        <section class="panel context-panel">
+          <div class="context-grid">
+            <div class="context-block">
+              <h2>当前焦点</h2>
+              <div class="kv-grid">
+                <div><span>应用</span><strong id="focusApp">--</strong></div>
+                <div><span>分类</span><strong id="focusCategory">--</strong></div>
+                <div class="wide">
+                  <span>标题</span>
+                  <div class="focus-title-line">
+                    <strong id="focusTitle">--</strong>
+                    <strong id="focusDuration" class="focus-duration">--</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="context-block">
+              <h2>通讯旁路</h2>
+              <div class="kv-grid">
+                <div><span>状态</span><strong id="commStatus">无</strong></div>
+                <div class="wide">
+                  <span>应用</span>
+                  <div class="focus-title-line">
+                    <strong id="commApps">--</strong>
+                    <strong id="commDuration" class="focus-duration">0m</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <h2>最近场景判断</h2>
+            <span id="llmAge" class="badge neutral">从未</span>
+          </div>
+
+          <div class="kv-grid compact">
+            <div><span>触发原因</span><strong id="llmReason">--</strong></div>
+            <div><span>耗时</span><strong id="llmLatency">--</strong></div>
+            <div><span>输入 Token</span><strong id="llmInputTokens">--</strong></div>
+            <div><span>输出 Token</span><strong id="llmOutputTokens">--</strong></div>
+          </div>
+
+          <div class="json-section-title">
+            <h3>判断输入</h3>
+            <div class="json-actions">
+              <button data-json-action="expand" data-json-target="llmInput">展开</button>
+              <button data-json-action="collapse" data-json-target="llmInput">折叠</button>
+              <button data-json-action="copy" data-json-target="llmInput">复制</button>
+            </div>
+          </div>
+          <div id="llmInput" class="json-tree empty">暂无</div>
+
+          <div class="json-section-title">
+            <h3>判断输出</h3>
+            <div class="json-actions">
+              <button data-json-action="expand" data-json-target="llmOutput">展开</button>
+              <button data-json-action="collapse" data-json-target="llmOutput">折叠</button>
+              <button data-json-action="copy" data-json-target="llmOutput">复制</button>
+            </div>
+          </div>
+          <div id="llmOutput" class="json-tree empty">暂无</div>
+        </section>
+
+      </div>
+
+      <div class="column detail-column">
+
+        <section class="panel">
+          <div class="panel-title">
+            <h2>活动分类占比</h2>
+            <span id="profileWindow" class="badge neutral">--</span>
+          </div>
+          <div id="categoryProfile" class="profile-list empty">
+            暂无活动数据
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title category-panel-title">
+            <h2>应用分类</h2>
+            <button id="categoryClassifyBtn" class="classify-button">
+              LLM 识别
+            </button>
+          </div>
+
+          <div class="stat-row category-tabs">
+            <button class="category-stat" data-view="all">
+              <strong id="totalApps">0</strong>
+              <span>总应用</span>
+            </button>
+
+            <button class="category-stat" data-view="known">
+              <strong id="knownApps">0</strong>
+              <span>已分类应用</span>
+            </button>
+
+            <button class="category-stat" data-view="unknown">
+              <strong id="unknownApps">0</strong>
+              <span>待分类</span>
+            </button>
+
+            <button class="category-stat" data-view="categories">
+              <strong id="categoryCount">0</strong>
+              <span>分类</span>
+            </button>
+          </div>
+
+          <div id="categoryDetail" class="category-detail hidden"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <h2>待确认分类</h2>
+            <div class="panel-actions">
+              <span id="confirmCount" class="badge neutral">0</span>
+              <button id="categoryWebClassifyBtn"
+                      class="mini-action"
+                      title="联网识别全部待确认应用">
+                批量联网
+              </button>
+            </div>
+          </div>
+          <div id="confirmList" class="confirm-list empty">
+            暂无待确认项目
+          </div>
+        </section>
+
+      </div>
+
+      <div class="column activity-column">
+        <section class="panel">
+          <div class="panel-title">
+            <h2>运行状态</h2>
+            <span id="healthBadge" class="badge neutral">--</span>
+          </div>
+          <div class="activity-health kv-grid compact">
+            <div><span>最近数据扫描</span><strong id="lastScan">--</strong></div>
+            <div><span>扫描间隔</span><strong id="scanInterval">--</strong></div>
+            <div><span>数据桶</span><strong id="bucketCount">0</strong></div>
+            <div><span>插件运行时间</span><strong id="uptime">--</strong></div>
+          </div>
+        </section>
+
+        <section class="panel activity-panel">
+          <div class="panel-title">
+            <h2>最近活动记录</h2>
+            <span id="activityCount" class="badge neutral">0</span>
+          </div>
+          <div id="recentActivities" class="activity-list empty">
+            暂无活动记录
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

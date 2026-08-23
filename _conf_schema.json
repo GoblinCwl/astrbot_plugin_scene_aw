@@ -1,0 +1,189 @@
+{
+  "aw_base_url": {
+    "description": "ActivityWatch HTTP API 地址",
+    "type": "string",
+    "default": "http://127.0.0.1:5600",
+    "hint": "填写 AstrBot 运行环境能够访问的 ActivityWatch Server 地址；Docker 部署通常需要改为宿主机地址。"
+  },
+  "scan_interval_seconds": {
+    "description": "ActivityWatch 增量扫描间隔（秒）",
+    "type": "int",
+    "default": 30
+  },
+  "startup_lookback_minutes": {
+    "description": "插件启动时回溯 ActivityWatch 的时间范围（分钟）",
+    "type": "int",
+    "default": 10
+  },
+  "aw_offline_after_seconds": {
+    "description": "多久没有任何 ActivityWatch heartbeat 后判定为 OFFLINE（秒）",
+    "type": "int",
+    "default": 180
+  },
+  "max_threads": {
+    "description": "Scene LLM 最多返回的语义事务线程数（上限 3）",
+    "type": "int",
+    "default": 3,
+    "slider": {
+      "min": 1,
+      "max": 3,
+      "step": 1
+    }
+  },
+  "scene_candidate_hold_seconds": {
+    "description": "活动模式持续变化多久后允许调用 Scene LLM（秒）",
+    "type": "int",
+    "default": 90
+  },
+  "scene_llm_min_interval_seconds": {
+    "description": "Scene LLM 最短调用间隔（秒）",
+    "type": "int",
+    "default": 300
+  },
+  "category_bootstrap_days": {
+    "description": "Category 初始化时扫描历史 App 的时间范围（天）",
+    "type": "int",
+    "default": 14
+  },
+  "category_definitions": {
+    "description": "应用分类定义",
+    "type": "text",
+    "default": "编程：IDE、代码编辑器、开发/调试工具\n运维：终端、SSH、远程桌面、服务器/环境管理\n通讯：IM、邮件、会议、人与人通信客户端\n浏览：网页浏览器\n文档：笔记、Office、PDF、知识/文档工具\n影音：本地播放器、专用影音客户端\n创作：图像设计、绘画、视频剪辑、音频制作、3D/CAD、直播录制等内容生产工具\n游戏：游戏本体、明确游戏平台/启动器\n其他：系统工具、截图、文件管理、VPN、无法明确归入以上类别",
+    "hint": "每行一个“名称：描述”。这份列表同时控制分类 LLM、结果校验、手动下拉框和分类统计；缺少“其他”时会自动补充。"
+  },
+  "category_auto_apply_confidence": {
+    "description": "AI 自动写入 Category 的最低置信度",
+    "type": "float",
+    "default": 0.9,
+    "slider": {
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    }
+  },
+  "category_web_auto_apply_confidence": {
+    "description": "联网识别自动写入 Category 的最低置信度",
+    "type": "float",
+    "default": 0.5,
+    "slider": {
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    },
+    "hint": "仅用于批量联网识别；低于该置信度的应用保留在待确认列表。"
+  },
+  "context_injection_enabled": {
+    "description": "向对话注入当前场景上下文",
+    "type": "bool",
+    "default": true,
+    "hint": "仅在工作电脑 ACTIVE 且非 AFK 时注入事务、焦点分类和最近五分钟分类概况；内容只参与本轮请求，不写入会话历史。"
+  },
+  "new_app_notification_enabled": {
+    "description": "新应用主动分类提醒",
+    "type": "bool",
+    "default": false,
+    "hint": "仅提醒插件启动后首次发现、尚未分类且从未通知过的应用；建议分类不会自动写入。"
+  },
+  "new_app_notification_unified_msg_origin": {
+    "description": "新应用提醒会话 UNO",
+    "type": "string",
+    "default": "",
+    "hint": "主动消息固定发送到此 unified_msg_origin；开启提醒但留空时不会发送并记录警告。"
+  },
+  "new_app_notification_quiet_minutes": {
+    "description": "新应用批量等待时间（分钟）",
+    "type": "int",
+    "default": 3,
+    "slider": {
+      "min": 1,
+      "max": 30,
+      "step": 1
+    },
+    "hint": "发现新应用后等待；期间每出现一个新应用都会重新计时，安静达到该时长后合并发送一次。"
+  },
+  "new_app_notification_template": {
+    "description": "新应用提醒模板",
+    "type": "text",
+    "default": "发现以下 {count} 个未分类应用：\n\n{items}\n\n请确认建议分类，或者告诉我要调整成什么分类。",
+    "hint": "支持 {count}、{items}、{categories}；{items} 已包含应用名称、建议和置信度。"
+  },
+  "scene_llm_provider_id": {
+    "description": "Scene 分析模型",
+    "type": "string",
+    "default": "",
+    "_special": "select_provider",
+    "hint": "直接选择 AstrBot 已配置的 LLM Provider；留空时后续可使用默认 Provider"
+  },
+  "scene_llm_prompt": {
+    "description": "Scene LLM 提示词",
+    "type": "text",
+    "default": "根据输入判断用户当前正在维持的具体事务。\n\n规则：\n1. category_summary 是最近五分钟的分类时间汇总，只用于理解活动方向，不能单独决定具体事务。\n2. recent_activity 是最近五分钟按时间从早到晚排列的活动片段。结合 app、title、active_seconds 和 ocr_keywords 判断持续主线与短暂插曲；优先把持续时间长或反复返回的同一主题作为 primary。\n3. current_focus 只表示此刻窗口，不自动等于 primary。短暂查看不能替换 recent_activity 中仍有持续证据的主事务；current_focus.enhanced 是增强 watcher 返回的原始字段，按实际语义使用。\n4. 只依据本次输入判断，不推测或延续输入中没有证据的旧事务。应用或分类相同不代表主题相同。\n5. 返回 1 个 primary 和最多 {{max_secondary}} 个 secondary。secondary 必须是 recent_activity 中有独立、明确且持续证据支持的并行事务；零碎插曲不作为 secondary。\n6. 场景名称描述具体事务，不使用应用名或‘浏览/编程/运维’等分类名代替；每个名称不超过 16 个中文字符。电影、视频或直播使用‘观看……’；当前焦点分类为游戏或正在操作游戏进程时使用‘游玩……’，不得使用‘观看……’。\n7. OCR 只是辅助证据。忽略拼写错误、孤立界面词，以及无法被应用名或标题印证的关键词。\n8. communication.active=false 时忽略其 active_seconds；零碎通讯不抢占 primary。\n9. confidence 为 0~1，仅根据本次输入评估。\n\n只返回 JSON，不要 Markdown或解释：\n{\"scenes\":[{\"name\":string,\"role\":\"primary\"|\"secondary\",\"confidence\":number}]}\n\n输入：\n{{input}}",
+    "hint": "可使用 {{input}} 放置输入 JSON、{{max_secondary}} 放置最大并行事务数；配置为空时控制台报错并停用 Scene LLM，遗漏 {{input}} 时插件会自动把输入追加到末尾。"
+  },
+  "category_llm_provider_id": {
+    "description": "Category 分类模型",
+    "type": "string",
+    "default": "",
+    "_special": "select_provider",
+    "hint": "用于初始化和维护应用分类，建议选择便宜的网络小模型"
+  },
+  "tavily_api_key": {
+    "description": "Tavily API Key",
+    "type": "string",
+    "default": "",
+    "hint": "仅在待确认分类中点击‘联网’时使用；只搜索应用文件名，不提交窗口标题。"
+  },
+  "category_llm_prompt": {
+    "description": "Category LLM 提示词",
+    "type": "text",
+    "default": "你负责给桌面应用做稳定、长期的工具类型分类。\n\n只能从下面的分类定义中选择一个：\n{{categories}}\n\n注意：\n1. 根据 app 名和窗口标题判断。\n2. 输入包含 web_evidence 时，优先利用搜索结果辨认陌生应用；搜索结果只是证据，不能改变分类范围。\n3. 不创建新分类。\n4. 不按项目、网站内容或具体工作目的分类。\n5. 浏览器永远归‘浏览’，即使标题是视频、购物或开发网站。\n6. 不确定时归‘其他’，降低 confidence。\n7. confidence 为 0~1。\n\n只返回 JSON 数组，不要解释，不要 Markdown。返回结构（以下是类型说明，不是分类内容）：\narray<{app:string, category:string, confidence:number}>\n\n待分类应用：\n{{input}}",
+    "hint": "{{categories}} 插入“应用分类定义”，{{input}} 插入待分类应用 JSON；配置为空时控制台报错并停用全部 Category LLM 分类，遗漏占位符时插件会自动补充。"
+  },
+  "category_classify_on_startup": {
+    "description": "插件启动时自动执行未知 App AI 分类",
+    "type": "bool",
+    "default": false,
+    "hint": "默认关闭。开启后，插件启动时会对当前未分类 App 调用 Category 分类模型。"
+  },
+  "scene_llm_on_startup": {
+    "description": "插件启动首次完成 AW 扫描后立即调用一次 Scene LLM",
+    "type": "bool",
+    "default": true
+  },
+  "scene_profile_window_seconds": {
+    "description": "Scene 活动模式统计窗口长度（秒）",
+    "type": "int",
+    "default": 300
+  },
+  "scene_profile_change_threshold": {
+    "description": "活动模式变化达到多少才重新判断 Scene（0~1）",
+    "type": "float",
+    "default": 0.35,
+    "slider": {
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    }
+  },
+  "scene_switch_min_confidence": {
+    "description": "更换主事务所需的最低置信度（0~1）",
+    "type": "float",
+    "default": 0.65,
+    "slider": {
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    }
+  },
+  "scene_name_similarity_threshold": {
+    "description": "事务名称视为相同所需的相似度（0~1）",
+    "type": "float",
+    "default": 0.82,
+    "slider": {
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    },
+    "hint": "本地计算，不调用 LLM；设为 1 可近似关闭名称归一。"
+  }
+}
