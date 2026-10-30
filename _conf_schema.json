@@ -5,6 +5,12 @@
     "default": "http://127.0.0.1:5600",
     "hint": "填写 AstrBot 运行环境能够访问的 ActivityWatch Server 地址；Docker 部署通常需要改为宿主机地址。"
   },
+  "category_sync_aw_base_url": {
+    "description": "同步到分类服务器",
+    "type": "string",
+    "default": "",
+    "hint": "可选。留空时不执行同步；填写后，每次分类写入都会将完整 category_sets 及 active_set_ids POST 到该 ActivityWatch Server。"
+  },
   "scan_interval_seconds": {
     "description": "ActivityWatch 增量扫描间隔（秒）",
     "type": "int",

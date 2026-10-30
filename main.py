@@ -89,6 +89,14 @@ class SceneAwPlugin(Star):
                 "http://127.0.0.1:5600",
             )
         )
+        category_sync_url = str(
+            self.config.get("category_sync_aw_base_url", "") or ""
+        ).strip()
+        self.category_sync_aw = (
+            ActivityWatchClient(category_sync_url)
+            if category_sync_url
+            else None
+        )
 
         self.collector = ActivityCollector(self.aw)
 
@@ -115,6 +123,7 @@ class SceneAwPlugin(Star):
 
         self.category_manager = CategoryManager(
             self.aw,
+            category_sync_aw=self.category_sync_aw,
             bootstrap_days=int(
                 self.config.get("category_bootstrap_days", 14)
             ),

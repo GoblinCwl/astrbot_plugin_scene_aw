@@ -54,6 +54,7 @@ pip install -r data/plugins/astrbot_plugin_scene_aw/requirements.txt
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
 | `aw_base_url` | `http://127.0.0.1:5600` | AstrBot 可访问的 ActivityWatch Server 地址 |
+| `category_sync_aw_base_url` | 空 | 可选的分类同步 ActivityWatch Server；留空时不同步，每次分类写入时会 POST 完整 `category_sets` 和 `active_set_ids` |
 | `scan_interval_seconds` | `30` | ActivityWatch 增量扫描间隔，最小按 10 秒执行 |
 | `startup_lookback_minutes` | `10` | 启动首次扫描的回溯时间 |
 | `aw_offline_after_seconds` | `180` | 无 heartbeat 后判定离线的时间 |

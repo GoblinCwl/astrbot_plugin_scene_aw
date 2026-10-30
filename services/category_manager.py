@@ -37,10 +37,13 @@ class CategoryManager:
     def __init__(
         self,
         aw: ActivityWatchClient,
+        category_sync_aw: ActivityWatchClient | None = None,
         bootstrap_days: int = 14,
         main_categories: tuple[str, ...] = MAIN_CATEGORIES,
     ):
         self.aw = aw
+        # 此服务仅用于写入完整 category_sets，不参与读取和分类判断。
+        self.category_sync_aw = category_sync_aw
         self.bootstrap_days = bootstrap_days
         self.main_categories = tuple(main_categories)
 
@@ -160,6 +163,17 @@ class CategoryManager:
 
         # v0.14 的 POST 会整体替换，必须回写完整 CategorySet 数组。
         await self.aw.update_setting("category_sets", category_sets)
+        if self.category_sync_aw is not None:
+            await self.category_sync_aw.update_setting(
+                "category_sets",
+                category_sets,
+            )
+            # 分类集定义本身不足以让 AW Web 参与统计；同步激活集，
+            # 让目标服务器同样启用当前使用的 CategorySet。
+            await self.category_sync_aw.update_setting(
+                "active_set_ids",
+                self.active_set_ids,
+            )
 
     def _rule_regex(self, category: dict[str, Any]) -> str | None:
         rule = category.get("rule") or {}
